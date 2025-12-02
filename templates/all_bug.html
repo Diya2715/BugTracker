@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 style="margin-bottom: 20px;">All Bugs</h2>
+    
+    <div class="filter-section">
+        <h3 style="margin-bottom: 15px;">Search & Filter</h3>
+        <form method="GET">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label for="search">Search</label>
+                    <input type="text" id="search" name="search" value="{{ search }}" placeholder="Search by title or description">
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category">
+                        <option value="">All Categories</option>
+                        <option value="UI" {% if category == 'UI' %}selected{% endif %}>UI</option>
+                        <option value="Backend" {% if category == 'Backend' %}selected{% endif %}>Backend</option>
+                        <option value="Performance" {% if category == 'Performance' %}selected{% endif %}>Performance</option>
+                        <option value="Security" {% if category == 'Security' %}selected{% endif %}>Security</option>
+                        <option value="Database" {% if category == 'Database' %}selected{% endif %}>Database</option>
+                        <option value="API" {% if category == 'API' %}selected{% endif %}>API</option>
+                        <option value="Other" {% if category == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="severity">Severity</label>
+                    <select id="severity" name="severity">
+                        <option value="">All Severities</option>
+                        <option value="critical" {% if severity == 'critical' %}selected{% endif %}>Critical</option>
+                        <option value="high" {% if severity == 'high' %}selected{% endif %}>High</option>
+                        <option value="medium" {% if severity == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="low" {% if severity == 'low' %}selected{% endif %}>Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="open" {% if status == 'open' %}selected{% endif %}>Open</option>
+                        <option value="progress" {% if status == 'progress' %}selected{% endif %}>In Progress</option>
+                        <option value="closed" {% if status == 'closed' %}selected{% endif %}>Closed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assigned">Assigned To</label>
+                    <select id="assigned" name="assigned">
+                        <option value="">All Assignees</option>
+                        <option value="Unassigned" {% if assigned == 'Unassigned' %}selected{% endif %}>Unassigned</option>
+                        {% for user in users %}
+                        <option value="{{ user }}" {% if assigned == user %}selected{% endif %}>{{ user }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit">Apply Filters</button>
+            <a href="/bugs"><button type="button" class="btn-secondary">Clear Filters</button></a>
+        </form>
+    </div>
+
+    <div class="card">
+        {% if filtered_bugs %}
+        <p style="color: #7f8c8d; margin-bottom: 15px;">Showing {{ filtered_bugs|length }} of {{ total_bugs }} bugs</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Date Reported</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bug in filtered_bugs %}
+                <tr>
+                    <td>#{{ bug.id }}</td>
+                    <td>{{ bug.title }}</td>
+                    <td>{{ bug.category }}</td>
+                    <td><span class="badge badge-{{ bug.severity }}">{{ bug.severity }}</span></td>
+                    <td><span class="badge badge-{{ bug.status }}">{{ bug.status }}</span></td>
+                    <td>{{ bug.assigned_to or 'Unassigned' }}</td>
+                    <td>{{ bug.date }}</td>
+                    <td>
+                        <a href="/bug/{{ bug.id }}"><button type="button" style="padding: 6px 12px; font-size: 12px;">View</button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #7f8c8d; text-align: center; padding: 20px;">No bugs found matching your criteria.</p>
+        {% endif %}
+    </div>
+
+    {% endblock %}

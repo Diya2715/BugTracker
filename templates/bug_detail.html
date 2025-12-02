@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Bug #{{ bug.id }}{% endblock %}
+
+{% block content %}
+{% if message %}
+<div class="alert alert-success">{{ message }}</div>
+{% endif %}
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Bug #{{ bug.id }}: {{ bug.title }}</h2>
+        <a href="/bugs"><button type="button" class="btn-secondary">Back to List</button></a>
+    </div>
+    
+    <div class="bug-detail">
+        <p><strong>Status:</strong> <span class="badge badge-{{ bug.status }}">{{ bug.status }}</span></p>
+        <p><strong>Category:</strong> {{ bug.category }}</p>
+        <p><strong>Severity:</strong> <span class="badge badge-{{ bug.severity }}">{{ bug.severity }}</span></p>
+        <p><strong>Assigned To:</strong> {{ bug.assigned_to or 'Unassigned' }}</p>
+        <p><strong>Date Reported:</strong> {{ bug.date }}</p>
+        {% if bug.attachment %}
+        <p><strong>Attachment:</strong> {{ bug.attachment }}</p>
+        {% endif %}
+        
+        <h3 style="margin-top: 25px; margin-bottom: 10px;">Description</h3>
+        <p style="background: #f8f9fa; padding: 15px; border-radius: 4px; line-height: 1.6;">{{ bug.description }}</p>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 15px;">Bug Assignment</h3>
+    <form method="POST" action="/bug/{{ bug.id }}/assign">
+        <div class="form-group">
+            <label for="assigned_to">Assign To</label>
+            <select id="assigned_to" name="assigned_to" required>
+                <option value="">Select team member...</option>
+                {% for user in users %}
+                <option value="{{ user }}" {% if bug.assigned_to == user %}selected{% endif %}>{{ user }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit">Update Assignment</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 15px;">Update Status</h3>
+    <form method="POST" action="/bug/{{ bug.id }}/status">
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+                <option value="open" {% if bug.status == 'open' %}selected{% endif %}>Open</option>
+                <option value="progress" {% if bug.status == 'progress' %}selected{% endif %}>In Progress</option>
+                <option value="closed" {% if bug.status == 'closed' %}selected{% endif %}>Closed</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-success">Update Status</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 15px;">Delete Bug</h3>
+    <p style="color: #7f8c8d; margin-bottom: 15px;">This action cannot be undone.</p>
+    <form method="POST" action="/bug/{{ bug.id }}/delete" onsubmit="return confirm('Are you sure you want to delete this bug?');">
+        <button type="submit" class="btn-danger">Delete Bug</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 15px;">Comments ({{ comments|length }})</h3>
+    
+    <!-- Add Comment Form -->
+    <form method="POST" action="/bug/{{ bug.id }}/comment" style="margin-bottom: 30px;">
+        <div class="form-group">
+            <label for="author">Your Name</label>
+            <select id="author" name="author" required>
+                <option value="">Select your name...</option>
+                {% for user in users %}
+                <option value="{{ user }}">{{ user }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea id="comment" name="comment" required placeholder="Share your thoughts, ask questions, or provide updates..." style="min-height: 80px;"></textarea>
+        </div>
+        <button type="submit">Add Comment</button>
+    </form>
+
+    <!-- Display Comments -->
+    {% if comments %}
+        <div style="border-top: 2px solid #e0e0e0; padding-top: 20px;">
+            {% for comment in comments %}
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3498db;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <strong style="color: #2c3e50; font-size: 16px;">{{ comment.author }}</strong>
+                        <span style="color: #7f8c8d; font-size: 13px; margin-left: 10px;">{{ comment.date }}</span>
+                    </div>
+                    <form method="POST" action="/comment/{{ comment.id }}/delete" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this comment?');">
+                        <button type="submit" class="btn-danger" style="padding: 4px 10px; font-size: 12px;">Delete</button>
+                    </form>
+                </div>
+                <p style="color: #34495e; line-height: 1.6; margin: 0;">{{ comment.text }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #7f8c8d; padding: 20px; background: #f8f9fa; border-radius: 8px;">No comments yet. Be the first to comment!</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style="margin-bottom: 20px;">Bug Dashboard</h2>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_bugs }}</div>
+            <div class="stat-label">Total Bugs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ open_bugs }}</div>
+            <div class="stat-label">Open Bugs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ in_progress_bugs }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ closed_bugs }}</div>
+            <div class="stat-label">Closed</div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3>Category Distribution</h3>
+        <div class="pie-chart">
+            {% for category, count in category_dist.items() %}
+            <div class="pie-slice">
+                <div class="pie-box" style="background: {{ colors[category] }};"></div>
+                <div><strong>{{ count }}</strong></div>
+                <div style="font-size: 12px; color: #7f8c8d;">{{ category }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="legend">
+            {% for category, color in colors.items() %}
+            <div class="legend-item">
+                <div class="legend-color" style="background: {{ color }};"></div>
+                <span>{{ category }}: {{ category_dist.get(category, 0) }} bugs</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-bottom: 15px;">Recent Bugs</h3>
+        {% if recent_bugs %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bug in recent_bugs %}
+                <tr onclick="window.location.href='/bug/{{ bug.id }}'" style="cursor: pointer;">
+                    <td>#{{ bug.id }}</td>
+                    <td>{{ bug.title }}</td>
+                    <td>{{ bug.category }}</td>
+                    <td><span class="badge badge-{{ bug.severity }}">{{ bug.severity }}</span></td>
+                    <td><span class="badge badge-{{ bug.status }}">{{ bug.status }}</span></td>
+                    <td>{{ bug.assigned_to or 'Unassigned' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #7f8c8d; text-align: center; padding: 20px;">No bugs reported yet.</p>
+        {% endif %}
+    </div>
+
+    {% endblock %}
