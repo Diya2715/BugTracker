@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 style="margin-bottom: 20px;">Bug Dashboard</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="margin: 0;">Bug Dashboard</h2>
+    <a href="/export/csv">
+        <button type="button" style="background: #27ae60;"> 🚗 Export to CSV</button>
+    </a>
+</div>
+
     
     <div class="stats">
         <div class="stat-card">
@@ -42,7 +48,6 @@
             {% endfor %}
         </div>
     </div>
-
     <div class="card">
         <h3 style="margin-bottom: 15px;">Recent Bugs</h3>
         {% if recent_bugs %}

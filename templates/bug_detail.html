@@ -2,9 +2,9 @@
 {% block title %}Bug #{{ bug.id }}{% endblock %}
 
 {% block content %}
-{% if message %}
+<!--{% if message %}
 <div class="alert alert-success">{{ message }}</div>
-{% endif %}
+{% endif %}-->
 
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -91,7 +91,7 @@
     {% if comments %}
         <div style="border-top: 2px solid #e0e0e0; padding-top: 20px;">
             {% for comment in comments %}
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3498db;">
+            <div style="background: #b7cfe7ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3498db;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div>
                         <strong style="color: #2c3e50; font-size: 16px;">{{ comment.author }}</strong>

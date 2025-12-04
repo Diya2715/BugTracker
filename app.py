@@ -1,20 +1,22 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from datetime import datetime
-import secrets
+from datetime import datetime   #Used to import time stamps
+import secrets                  #Used to generate secure secrete key
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)
+app.secret_key = secrets.token_hex(16)   #Secure key for session messsaging
 
-# temporary storage
+# temporary storage for bug information
 bugs = []
 bug_id_counter = 1
 comments = []
 comment_id_counter = 1
 users = ['Admin 1', 'Admin 2', 'Admin 3']
 
+#This is homepage
 @app.route('/')
 def dashboard():
     total = len(bugs)
+    
     #Count total bugs
     open_count = 0
     for bug in bugs:
@@ -33,7 +35,7 @@ def dashboard():
         if bug['status'] == 'closed':
             closed_count += 1
             
-     # Count bugs in each category (UI, Backend, etc.)
+     # Count bugs in each category
     category_dist = {}
     for bug in bugs:
         category = bug['category']
@@ -47,7 +49,7 @@ def dashboard():
     
     colors = {
         'UI': "#2793db",
-        'Backend': "#e76a3c",
+        'Backend': "#ec7347",
         'Performance': '#f39c12',
         'Security': "#bc93cd",
         'Database': "#57c5af",
@@ -66,7 +68,7 @@ def dashboard():
                                  category_dist=category_dist,
                                  colors=colors,
                                  recent_bugs=recent)
-
+#This is report bug form
 @app.route('/report', methods=['GET', 'POST'])
 def report_bug():
     global bug_id_counter
@@ -102,6 +104,7 @@ def report_bug():
     #template = BASE_TEMPLATE.replace('{% block content %}{% endblock %}', REPORT_BUG_TEMPLATE)
     return render_template('report_bug.html', title='Report Bug')
 
+#This page shows all bugs
 @app.route('/bugs')
 def all_bugs():
     search = request.args.get('search', '')
@@ -145,6 +148,7 @@ def all_bugs():
                                  assigned=assigned,
                                  users=users)
 
+# This is needed to display the correct bug page
 @app.route('/bug/<int:bug_id>')
 def bug_detail(bug_id):
     bug = next((b for b in bugs if b['id'] == bug_id), None)
@@ -161,8 +165,9 @@ def bug_detail(bug_id):
                                  title=f'Bug #{bug_id}',
                                  bug=bug,
                                  users=users,
-                                 message=message)
-
+                                 message=message,
+                                 comments=bug_comments)
+#Allow assign bugs to user
 @app.route('/bug/<int:bug_id>/assign', methods=['POST'])
 def assign_bug(bug_id):
     bug = next((b for b in bugs if b['id'] == bug_id), None)
@@ -173,6 +178,7 @@ def assign_bug(bug_id):
     
     return redirect(url_for('bug_detail', bug_id=bug_id))
 
+#Stores update on bug status
 @app.route('/bug/<int:bug_id>/status', methods=['POST'])
 def update_status(bug_id):
     bug = next((b for b in bugs if b['id'] == bug_id), None)
@@ -183,6 +189,7 @@ def update_status(bug_id):
     
     return redirect(url_for('bug_detail', bug_id=bug_id))
 
+#Removes the bug from temporary storage
 @app.route('/bug/<int:bug_id>/delete', methods=['POST'])
 def delete_bug(bug_id):
     global bugs
@@ -192,7 +199,7 @@ def delete_bug(bug_id):
     return redirect(url_for('dashboard'))
     
     
-    
+#Lets you add comment   
 @app.route('/bug/<int:bug_id>/comment', methods=['POST'])
 def add_comment(bug_id):
     global comment_id_counter
@@ -228,6 +235,26 @@ def delete_comment(comment_id):
         return redirect(url_for('bug_detail', bug_id=bug_id))
     
     return redirect(url_for('dashboard'))
+
+@app.route('/export/csv')
+def export_csv():
+    """Export bugs to CSV format"""
+    import io
+    
+    output = io.StringIO()
+    output.write('ID,Title,Category,Severity,Status,Assigned To,Date\n')
+    
+    for bug in bugs:
+        output.write(f"{bug['id']},{bug['title']},{bug['category']},")
+        output.write(f"{bug['severity']},{bug['status']},")
+        output.write(f"{bug.get('assigned_to', 'Unassigned')},{bug['date']}\n")
+    
+    response = app.response_class(
+        response=output.getvalue(),
+        mimetype='text/csv'
+    )
+    response.headers['Content-Disposition'] = 'attachment; filename=bugs.csv'
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
